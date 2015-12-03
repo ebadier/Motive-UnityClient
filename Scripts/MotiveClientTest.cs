@@ -6,32 +6,32 @@ namespace MotiveStream
 	[RequireComponent(typeof(MotiveClient))]
 	public class MotiveClientTest : MonoBehaviour
 	{
-		public GameObject RigidBodyPrefab;
-		public GameObject BonePrefab;
+		public GameObject rigidBodyPrefab;
+		public GameObject bonePrefab;
 
-		private MotiveClient _MotiveClient;
-		private Dictionary<int, GameObject> _DebugRigidBodies;
-		private Dictionary<int, GameObject> _DebugBones;
+		private MotiveClient _motiveClient;
+		private Dictionary<int, GameObject> _debugRigidBodies;
+		private Dictionary<int, GameObject> _debugBones;
 
 		// Use this for initialization
 		void Awake()
 		{
-			_DebugRigidBodies = new Dictionary<int, GameObject>();
-			_DebugBones = new Dictionary<int, GameObject>();
+			_debugRigidBodies = new Dictionary<int, GameObject>();
+			_debugBones = new Dictionary<int, GameObject>();
 
-			_MotiveClient = GetComponent<MotiveClient>();
-			_MotiveClient.NewFrameReceived += OnNewFrameReceived;
+			_motiveClient = GetComponent<MotiveClient>();
+			_motiveClient.NewFrameReceived += OnNewFrameReceived;
         }
 
 		void OnDestroy()
 		{
-			_MotiveClient.NewFrameReceived -= OnNewFrameReceived;
+			_motiveClient.NewFrameReceived -= OnNewFrameReceived;
 		}
 
-		void OnNewFrameReceived(object sender, ReadOnlyEventArgs<FrameData> args)
+		void OnNewFrameReceived(object sender, FrameDataEventArgs args)
 		{
 			//Debug.Log("New Frame received !");
-			FrameData newFrame = args.Parameter;
+			FrameData newFrame = args.FrameData;
 
 			HashSet<int> toRemove = new HashSet<int>();
  
@@ -39,18 +39,18 @@ namespace MotiveStream
 			//// Update RigidBodies if needed
             foreach (var rb in newFrame.RigidBodies)
             {
-				if (!_DebugRigidBodies.ContainsKey(rb.Key))
+				if (!_debugRigidBodies.ContainsKey(rb.Key))
 				{
-					GameObject newRb = GameObject.Instantiate(RigidBodyPrefab);
+					GameObject newRb = GameObject.Instantiate(rigidBodyPrefab);
 					newRb.name = rb.Value.Name;
-					_DebugRigidBodies.Add(rb.Key, newRb);
+					_debugRigidBodies.Add(rb.Key, newRb);
 				}
-				GameObject debugRb = _DebugRigidBodies[rb.Key];
+				GameObject debugRb = _debugRigidBodies[rb.Key];
 				debugRb.transform.position = rb.Value.Position;
 				debugRb.transform.rotation = rb.Value.Orientation;
 			}
 			//// Destroy RigidBodies if needed
-			foreach(var debugRb in _DebugRigidBodies)
+			foreach(var debugRb in _debugRigidBodies)
 			{
 				if(!newFrame.RigidBodies.ContainsKey(debugRb.Key))
 				{
@@ -60,7 +60,7 @@ namespace MotiveStream
 			}
 			foreach(int key in toRemove)
 			{
-				_DebugRigidBodies.Remove(key);
+				_debugRigidBodies.Remove(key);
             }
 			toRemove.Clear();
 
@@ -68,18 +68,18 @@ namespace MotiveStream
 			//// Update Bones if needed
 			foreach (var bone in newFrame.Bones)
 			{
-				if (!_DebugBones.ContainsKey(bone.Key))
+				if (!_debugBones.ContainsKey(bone.Key))
 				{
-					GameObject newBone = GameObject.Instantiate(BonePrefab);
+					GameObject newBone = GameObject.Instantiate(bonePrefab);
 					newBone.name = bone.Value.Name;
-					_DebugBones.Add(bone.Key, newBone);
+					_debugBones.Add(bone.Key, newBone);
 				}
-				GameObject debugBone = _DebugBones[bone.Key];
+				GameObject debugBone = _debugBones[bone.Key];
 				debugBone.transform.position = bone.Value.Position;
 				debugBone.transform.rotation = bone.Value.Orientation;
 			}
 			//// Destroy Bones if needed
-			foreach (var debugBone in _DebugBones)
+			foreach (var debugBone in _debugBones)
 			{
 				if (!newFrame.Bones.ContainsKey(debugBone.Key))
 				{
@@ -89,7 +89,7 @@ namespace MotiveStream
 			}
 			foreach(int key in toRemove)
 			{
-				_DebugBones.Remove(key);
+				_debugBones.Remove(key);
 			}
 		}
 	}

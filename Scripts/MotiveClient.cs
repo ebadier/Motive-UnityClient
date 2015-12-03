@@ -4,36 +4,46 @@ using UnityEngine;
 
 namespace MotiveStream
 {
+	public class FrameDataEventArgs : EventArgs
+	{
+		public FrameData FrameData { get; private set; }
+
+		public FrameDataEventArgs(FrameData pFrame)
+		{
+			FrameData = pFrame;
+		}
+	}
+
 	public class MotiveClient : MonoBehaviour
 	{
 		//public int SleepTime = 10;
-		private FrameData _Frame, _LastFrame;
-		private SlipStream _Client;
-		private Thread _Thread;
-		private object _Mutex;
-		private volatile bool _Receive = false;
+		private FrameData _frame, _lastFrame;
+		private SlipStream _client;
+		private Thread _thread;
+		private object _mutex;
+		private volatile bool _receive = false;
 
-		public event EventHandler<ReadOnlyEventArgs<FrameData>> NewFrameReceived;
+		public event EventHandler<FrameDataEventArgs> NewFrameReceived;
 
 		#region Private Methods
 		private void _ReceptionThread()
 		{
-			_Client = new SlipStream();
-			_Client.Connect();
-			_Receive = true;
+			_client = new SlipStream();
+			_client.Connect();
+			_receive = true;
 
-			while (_Receive && (_Client != null))
+			while (_receive && (_client != null))
 			{
-				if(_Client.Connected)
+				if(_client.Connected)
 				{
 					//Debug.Log("Client Connected !");
 
-					if (_Client.GetLastFrame())
+					if (_client.GetLastFrame())
 					{
-						lock (_Mutex)
+						lock (_mutex)
 						{
 							// Copy to avoid thread concurrency.
-							_LastFrame = new FrameData(_Client.LastFrame);
+							_lastFrame = new FrameData(_client.LastFrame);
 						}
 					}
 					//if (SleepTime > 0)
@@ -51,13 +61,13 @@ namespace MotiveStream
 		{
 			try
 			{
-				_Receive = false;
-				_Frame = new FrameData();
-				_LastFrame = new FrameData();
+				_receive = false;
+				_frame = new FrameData();
+				_lastFrame = new FrameData();
 
-				_Mutex = new object();
-				_Thread = new Thread(new ThreadStart(_ReceptionThread));
-				_Thread.Start();
+				_mutex = new object();
+				_thread = new Thread(new ThreadStart(_ReceptionThread));
+				_thread.Start();
 			}
 			catch (Exception ex)
 			{
@@ -70,22 +80,22 @@ namespace MotiveStream
 			try
 			{
 				//Debug.Log("Killing Thread...");
-				_Receive = false;
-				if(_Thread != null)
+				_receive = false;
+				if(_thread != null)
 				{
 					//Debug.Log("Thread Join !");
-					if(!_Thread.Join(100))
+					if(!_thread.Join(100))
 					{
-						_Thread.Interrupt();
+						_thread.Interrupt();
 						//Debug.Log("Thread Interrupted !");
 					}
 				}
 				//Debug.Log("Thread Killed !");
 
 				//Debug.Log("Closing Client...");
-				if (_Client != null)
+				if (_client != null)
 				{
-					_Client.Close();
+					_client.Close();
 					//Debug.Log("Client Closed !");
 				}
 			}
@@ -98,17 +108,17 @@ namespace MotiveStream
 		// Update is called once per frame
 		void Update()
 		{
-			if ( (_Client != null) && _Client.Connected)
+			if ( (_client != null) && _client.Connected)
 			{
 				//Debug.Log("Client connected !");
-				lock (_Mutex)
+				lock (_mutex)
 				{
-					_Frame = _LastFrame;
+					_frame = _lastFrame;
                 }
 
 				if (NewFrameReceived != null)
 				{
-					NewFrameReceived(this, new ReadOnlyEventArgs<FrameData>(_Frame));
+					NewFrameReceived(this, new FrameDataEventArgs(_frame));
 				}
 			}
 			//else
