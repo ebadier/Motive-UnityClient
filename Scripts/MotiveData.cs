@@ -35,22 +35,30 @@ namespace MotiveStream
 	{
 		public FrameData()
 		{
+			FrameNum = -1;
+			Time = 0.0f;
 			RigidBodies = new Dictionary<int, RigidBodyData>();
 			Bones = new Dictionary<int, BoneData>();
         }
 
 		public FrameData(FrameData pSrc)
 		{
+			FrameNum = pSrc.FrameNum;
+			Time = pSrc.Time;
 			RigidBodies = new Dictionary<int, RigidBodyData>(pSrc.RigidBodies);
 			Bones = new Dictionary<int, BoneData>(pSrc.Bones);
 		}
 
 		public void Clear()
 		{
+			FrameNum = -1;
+			Time = 0.0f;
 			RigidBodies.Clear();
 			Bones.Clear();
 		}
 
+		public int FrameNum { get; set; }
+		public double Time { get; set; }
 		public Dictionary<int, RigidBodyData> RigidBodies { get; private set; }
 		public Dictionary<int, BoneData> Bones { get; private set; }
 	}

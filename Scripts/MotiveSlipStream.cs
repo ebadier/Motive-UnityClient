@@ -107,6 +107,10 @@ namespace MotiveStream
 			LastFrame.Clear();
 			mXmlDoc.LoadXml(Packet);
 
+			XmlNode rootNode = mXmlDoc.SelectSingleNode("Stream");
+			LastFrame.FrameNum = System.Convert.ToInt32(rootNode.Attributes["Frame"].InnerText);
+			LastFrame.Time = System.Convert.ToDouble(rootNode.Attributes["Time"].InnerText);
+
 			//== skeletons ==--
 			XmlNodeList boneList = mXmlDoc.GetElementsByTagName("Bone");
 			for (int index = 0; index < boneList.Count; index++)

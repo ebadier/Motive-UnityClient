@@ -30,8 +30,8 @@ namespace MotiveStream
 
 		void OnNewFrameReceived(object sender, FrameDataEventArgs args)
 		{
-			//Debug.Log("New Frame received !");
 			FrameData newFrame = args.FrameData;
+			//Debug.Log("New Frame received : " + newFrame.FrameNum);
 
 			HashSet<int> toRemove = new HashSet<int>();
  
