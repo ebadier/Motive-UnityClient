@@ -8,8 +8,9 @@ namespace MotiveStream
 	{
 		public GameObject rigidBodyPrefab;
 		public GameObject bonePrefab;
+        public int uselayer = 0; // Specify a layer for created GameObjects (if you need to).
 
-		private MotiveClient _motiveClient;
+        private MotiveClient _motiveClient;
 		private Dictionary<int, GameObject> _debugRigidBodies;
 		private Dictionary<int, GameObject> _debugBones;
 
@@ -20,13 +21,17 @@ namespace MotiveStream
 			_debugBones = new Dictionary<int, GameObject>();
 
 			_motiveClient = GetComponent<MotiveClient>();
-			_motiveClient.NewFrameReceived += OnNewFrameReceived;
         }
 
-		void OnDestroy()
-		{
-			_motiveClient.NewFrameReceived -= OnNewFrameReceived;
-		}
+        void OnEnable()
+        {
+            _motiveClient.NewFrameReceived += OnNewFrameReceived;
+        }
+
+        void OnDisable()
+        {
+            _motiveClient.NewFrameReceived -= OnNewFrameReceived;
+        }
 
 		void OnNewFrameReceived(object sender, FrameDataEventArgs args)
 		{
@@ -43,6 +48,7 @@ namespace MotiveStream
 				{
 					GameObject newRb = GameObject.Instantiate(rigidBodyPrefab);
 					newRb.name = rb.Value.Name;
+                    newRb.layer = uselayer;
 					_debugRigidBodies.Add(rb.Key, newRb);
 				}
 				GameObject debugRb = _debugRigidBodies[rb.Key];
@@ -72,7 +78,8 @@ namespace MotiveStream
 				{
 					GameObject newBone = GameObject.Instantiate(bonePrefab);
 					newBone.name = bone.Value.Name;
-					_debugBones.Add(bone.Key, newBone);
+                    newBone.layer = uselayer;
+                    _debugBones.Add(bone.Key, newBone);
 				}
 				GameObject debugBone = _debugBones[bone.Key];
 				debugBone.transform.position = bone.Value.Position;
