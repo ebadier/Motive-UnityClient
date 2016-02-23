@@ -139,7 +139,7 @@ namespace MotiveStream
 			for (int index = 0; index < rbList.Count; index++)
 			{
 				int rbID = System.Convert.ToInt32(rbList[index].Attributes["ID"].InnerText);
-				string rbName = "RigidBody_" + rbID.ToString();
+				string rbName = rbList[index].Attributes["Name"].InnerText;
 
 				float x = (float)System.Convert.ToDouble(rbList[index].Attributes["x"].InnerText);
 				float y = (float)System.Convert.ToDouble(rbList[index].Attributes["y"].InnerText);
